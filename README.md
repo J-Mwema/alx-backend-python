@@ -7,7 +7,8 @@ Collection of small Python exercises and utilities used while learning backend d
 
 - `python-decorators-0x01/` — Exercises that implement decorators for database operations (logging, connection management, transactions, retrying, and caching). Each task is a standalone script (0-4) and includes a `setup_database.py` helper to create a test `users.db`.
 
-## Quick start
+## Quick start !
+
 
 1. Create the sample database (creates `users.db` in the working directory):
 
