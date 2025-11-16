@@ -27,16 +27,14 @@ class TestGithubOrgClient(unittest.TestCase):
     def test_public_repos_url(self):
         """Test _public_repos_url returns correct repos_url from org"""
         payload = {"repos_url": "https://api.github.com/orgs/testorg/repos"}
-        with patch.object(
-            GithubOrgClient, 'org', new_callable=PropertyMock
-        ) as mock_org:
+        # Patch the property on the class via the module target so the
+        # memoized property is replaced with a PropertyMock returning
+        # the known payload.
+        with patch('client.GithubOrgClient.org', new_callable=PropertyMock) as mock_org:
             mock_org.return_value = payload
             client = GithubOrgClient("testorg")
             result = client._public_repos_url
-            self.assertEqual(
-                result,
-                "https://api.github.com/orgs/testorg/repos"
-            )
+            self.assertEqual(result, "https://api.github.com/orgs/testorg/repos")
 
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json):
