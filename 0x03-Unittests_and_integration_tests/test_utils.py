@@ -52,6 +52,7 @@ class TestGetJson(unittest.TestCase):
             # Assert: result matches payload
             self.assertEqual(result, test_payload)
 
+
 class TestMemoize(unittest.TestCase):
     """Test the memoize decorator"""
 
@@ -69,7 +70,9 @@ class TestMemoize(unittest.TestCase):
         obj = TestClass()
 
         # Patch a_method
-        with unittest.mock.patch.object(obj, 'a_method', return_value=42) as mock_method:
+        with unittest.mock.patch.object(
+                obj, 'a_method', return_value=42
+        ) as mock_method:
             # Call twice
             result1 = obj.a_property
             result2 = obj.a_property

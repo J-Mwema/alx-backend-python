@@ -20,7 +20,10 @@ TEST_PAYLOAD = [
                 "created_at": "2013-01-19T00:31:37Z",
                 "updated_at": "2019-09-23T11:53:58Z",
                 "pushed_at": "2019-09-23T11:53:58Z",
-                "homepage": "https://developers.google.com/open-source/gsoc/2012/showcase",
+                "homepage": (
+                    "https://developers.google.com/open-source/"
+                    "gsoc/2012/showcase"
+                ),
                 "language": "Dart",
                 "forks_count": 0,
                 "stargazers_count": 0,
@@ -37,9 +40,14 @@ TEST_PAYLOAD = [
                 "visibility": "public",
                 "license": {
                     "key": "bsd-3-clause",
-                    "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+                    "name": (
+                        'BSD 3-Clause "New" or "Revised" License'
+                    ),
                     "spdx_id": "BSD-3-Clause",
-                    "url": "https://api.github.com/licenses/bsd-3-clause",
+                    "url": (
+                        "https://api.github.com/licenses/"
+                        "bsd-3-clause"
+                    ),
                     "node_id": "MDc6TGljZW5zZTU="
                 }
             },
@@ -63,7 +71,11 @@ TEST_PAYLOAD = [
                 "stargazers_count": 0,
                 "default_branch": "master",
                 "open_issues_count": 0,
-                "topics": ["dagger", "dependency-injection", "java"],
+                "topics": [
+                    "dagger",
+                    "dependency-injection",
+                    "java",
+                ],
                 "has_issues": True,
                 "has_projects": True,
                 "has_wiki": True,
@@ -76,7 +88,10 @@ TEST_PAYLOAD = [
                     "key": "apache-2.0",
                     "name": "Apache License 2.0",
                     "spdx_id": "Apache-2.0",
-                    "url": "https://api.github.com/licenses/apache-2.0",
+                    "url": (
+                        "https://api.github.com/licenses/"
+                        "apache-2.0"
+                    ),
                     "node_id": "MDc6TGljZW5zZW1pdGVy"
                 }
             }
