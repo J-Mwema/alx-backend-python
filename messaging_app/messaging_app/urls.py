@@ -20,5 +20,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('chats.urls')),  # include our app API
+    # include DRF login/logout views for the browsable API
+    path('api-auth/', include('rest_framework.urls')),
 ]
 
