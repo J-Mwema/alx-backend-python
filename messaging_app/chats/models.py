@@ -9,7 +9,13 @@ class User(AbstractUser):
     Custom User model using UUID instead of integer ID.
     Email must be unique.
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # use a UUID primary key named `user_id` to match the spec
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+
+    # compatibility: some code may expect `.id` attribute — provide a property alias
+    @property
+    def id(self):
+        return self.user_id
 
     first_name = models.CharField(max_length=150, null=False, blank=False)
     last_name = models.CharField(max_length=150, null=False, blank=False)
@@ -26,6 +32,9 @@ class User(AbstractUser):
 
     created_at = models.DateTimeField(default=timezone.now)
 
+    # store password hash separately if desired by the spec (does not replace Django's password field)
+    password_hash = models.CharField(max_length=128, null=False, blank=True)
+
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     def __str__(self):
@@ -36,7 +45,12 @@ class Conversation(models.Model):
     """
     Chat conversation. Many users may participate.
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # primary key named conversation_id to match the spec
+    conversation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+
+    @property
+    def id(self):
+        return self.conversation_id
     participants = models.ManyToManyField(User, related_name='conversations')
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -48,7 +62,12 @@ class Message(models.Model):
     """
     Individual chat messages inside a conversation.
     """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # primary key named message_id to match the spec
+    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+
+    @property
+    def id(self):
+        return self.message_id
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages_sent")
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     message_body = models.TextField(null=False)
