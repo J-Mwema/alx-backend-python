@@ -140,3 +140,14 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'chats.User'
 
+# Django REST Framework default settings: require authenticated access by default
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+}
+
