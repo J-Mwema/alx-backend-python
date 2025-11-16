@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import User, Conversation, Message
@@ -11,6 +11,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    # enable simple filtering/searching on conversations
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['participants__username']
+    ordering_fields = ['created_at']
 
     @action(detail=True, methods=['post'])
     def add_participants(self, request, pk=None):
@@ -37,6 +41,9 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['message_body', 'sender__username']
+    ordering_fields = ['sent_at']
 
     def create(self, request, *args, **kwargs):
         """
