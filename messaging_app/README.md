@@ -98,6 +98,52 @@ curl -X POST http://127.0.0.1:8000/api/messages/ \
 - Add tests for viewsets and serializers.
 - Harden settings for production (move `SECRET_KEY` to environment variables, set `DEBUG=False`, configure allowed hosts, static/media storage).
 
+## Postman collection
+
+There is a Postman collection file `post_man-Collections.json` included at the project root to help testing the API endpoints.
+
+How to use
+- Import `post_man-Collections.json` into Postman (File → Import → choose the file).
+- Set the collection variables or an environment with:
+	- `base_url` (default `http://127.0.0.1:8000`)
+	- `username` / `password` (your user credentials)
+	- `access_token` / `refresh_token` (will be filled after obtaining tokens)
+
+Steps
+1. Create a superuser if you haven't already:
+
+```bash
+source env/bin/activate
+python manage.py createsuperuser
+```
+
+2. Obtain JWT tokens using the "Auth - Obtain Token" request in Postman (POST `/api/token/`).
+	 Copy `access` into `access_token` and `refresh` into `refresh_token`.
+
+3. Use the collection requests (Conversations / Messages) — they include an `Authorization: Bearer {{access_token}}` header.
+
+Quick curl examples
+- Obtain token:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/token/ \
+	-H "Content-Type: application/json" \
+	-d '{"username":"admin","password":"yourpassword"}'
+```
+
+- Create a conversation (authenticated):
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/conversations/ \
+	-H "Content-Type: application/json" \
+	-H "Authorization: Bearer <ACCESS_TOKEN>" \
+	-d '{}'
+```
+
+Notes
+- The Postman collection is a convenience for manual testing. I can add Postman test scripts to automatically extract tokens into variables if you want.
+
+
 ## License & contact
 
 This repository template has no license specified. Add a `LICENSE` file if you want to open-source this project.
