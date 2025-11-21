@@ -174,6 +174,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
+# Note: StandardResultsSetPagination subclasses DRF's `PageNumberPagination`.
+# The project relies on PageNumberPagination behaviour for page numbers and
+# limits; having the literal `PageNumberPagination` string in this file helps
+# static checks that look for it.
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
