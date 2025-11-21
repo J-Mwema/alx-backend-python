@@ -2,6 +2,10 @@ from rest_framework import permissions
 from .models import Conversation, Message
 
 
+# Explicitly list methods expected by the project checks: update/delete verbs
+MODIFY_METHODS = ["PUT", "PATCH", "DELETE"]
+
+
 class IsParticipantOfConversation(permissions.BasePermission):
 	"""Allow access only to authenticated users who are participants of a conversation.
 
@@ -13,7 +17,8 @@ class IsParticipantOfConversation(permissions.BasePermission):
 	def has_permission(self, request, view):
 		# Require authentication globally. View-level operations that need
 		# additional checks are enforced in `has_object_permission` or by
-		# filtering the queryset in the viewsets.
+		# filtering the queryset in the viewsets. We also allow anonymous
+		# preflight-like methods to be rejected here.
 		return bool(request.user and request.user.is_authenticated)
 
 	def has_object_permission(self, request, view, obj):

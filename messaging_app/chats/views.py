@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from .models import User, Conversation, Message
 from .serializers import UserSerializer, ConversationSerializer, MessageSerializer
 from .permissions import IsParticipantOfConversation
+from rest_framework.permissions import IsAuthenticated
 from .pagination import StandardResultsSetPagination
 from . import filters as chat_filters
 
@@ -14,7 +15,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     # enable simple filtering/searching on conversations
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['participants__username']
@@ -57,7 +58,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     pagination_class = StandardResultsSetPagination
     # attach filterset_class only when available
