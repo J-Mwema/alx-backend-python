@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import User, Conversation, Message
 from .serializers import UserSerializer, ConversationSerializer, MessageSerializer
+from .permissions import IsParticipantOfConversation
+from .pagination import StandardResultsSetPagination
+from . import filters as chat_filters
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -11,6 +14,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    permission_classes = [IsParticipantOfConversation]
     # enable simple filtering/searching on conversations
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['participants__username']
@@ -34,6 +38,18 @@ class ConversationViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(conversation)
         return Response(serializer.data)
 
+    def get_queryset(self):
+        # Limit conversations to those the requesting user participates in
+        user = getattr(self.request, 'user', None)
+        if not user or not user.is_authenticated:
+            return Conversation.objects.none()
+        return Conversation.objects.filter(participants=user).distinct()
+
+    # Attach a filterset when django-filters is available
+    if getattr(chat_filters, 'ConversationFilter', None):
+        filterset_class = chat_filters.ConversationFilter
+    pagination_class = StandardResultsSetPagination
+
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
@@ -41,7 +57,12 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = [IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = StandardResultsSetPagination
+    # attach filterset_class only when available
+    if getattr(chat_filters, 'MessageFilter', None):
+        filterset_class = chat_filters.MessageFilter
     search_fields = ['message_body', 'sender__username']
     ordering_fields = ['sent_at']
 
@@ -62,7 +83,9 @@ class MessageViewSet(viewsets.ModelViewSet):
             conversation = Conversation.objects.get(id=conversation_id)
         except Conversation.DoesNotExist:
             return Response({"detail": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        # Ensure sender is a participant of the conversation
+        if not conversation.participants.filter(pk=sender.pk).exists():
+            return Response({"detail": "You are not a participant of this conversation"}, status=status.HTTP_403_FORBIDDEN)
         message = Message.objects.create(
             sender=sender,
             conversation=conversation,
@@ -71,4 +94,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        # Limit messages to those in conversations the requesting user participates in
+        user = getattr(self.request, 'user', None)
+        if not user or not user.is_authenticated:
+            return Message.objects.none()
+        return Message.objects.filter(conversation__participants=user).distinct()
 
