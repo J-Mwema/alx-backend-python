@@ -1,0 +1,55 @@
+{
+  "info": {
+    "name": "Messaging App - Postman Collection",
+    "_postman_id": "b1f5d6f2-collection",
+    "description": "Collection to test the messaging_app API: obtain JWT, create conversations, add participants, send/list messages.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Obtain Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {"mode": "raw", "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"},
+        "url": {"raw": "{{base_url}}/api/token/", "host": ["{{base_url}}"], "path": ["api","token",""]}
+      },
+      "response": []
+    },
+    {
+      "name": "Conversations - List/Create",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}"},
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {"raw": "{{base_url}}/api/conversations/", "host": ["{{base_url}}"], "path": ["api","conversations",""]}
+      },
+      "response": []
+    },
+    {
+      "name": "Messages - List/Create",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}"},
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {"raw": "{{base_url}}/api/messages/", "host": ["{{base_url}}"], "path": ["api","messages",""]}
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://127.0.0.1:8000"},
+    {"key": "username", "value": "admin"},
+    {"key": "password", "value": "password123"},
+    {"key": "access_token", "value": ""},
+    {"key": "refresh_token", "value": ""},
+    {"key": "conversation_id", "value": ""},
+    {"key": "participant_uuid", "value": ""}
+  ]
+}
