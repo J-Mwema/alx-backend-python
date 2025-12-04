@@ -9,6 +9,7 @@ services:
       - ./messaging_app/.env
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DB: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -32,7 +33,7 @@ services:
     command: >
       sh -c "python manage.py wait_for_db &&\
              python manage.py migrate &&\
-             gunicorn messaging_app.wsgi:application --bind 0.0.0.0:8000"
+             python3 manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./messaging_app:/app
     ports:
@@ -41,6 +42,7 @@ services:
       DEBUG: ${DEBUG}
       SECRET_KEY: ${SECRET_KEY}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DB: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_HOST: db
