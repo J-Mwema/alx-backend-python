@@ -92,67 +92,107 @@ curl -X POST http://127.0.0.1:8000/api/messages/ \
 	-d '{"conversation":"<conv-uuid>","message_body":"Hello world"}' -u username:password
 ```
 
-## Next steps / improvements
+"""Messaging App README
 
-- Add API authentication (Token or JWT) and apply `IsAuthenticated` permissions where appropriate.
-- Add tests for viewsets and serializers.
-- Harden settings for production (move `SECRET_KEY` to environment variables, set `DEBUG=False`, configure allowed hosts, static/media storage).
+Overview and quickstart for both local and Docker-based development.
+"""
+
+# Messaging App (Django REST)
+
+Lightweight messaging API built with Django and Django REST Framework. This app provides conversations and messages between users using a custom UUID-based `User` model.
+
+## Overview
+
+- Custom `User` model based on `AbstractUser` with UUID primary key, role, phone number and timestamps.
+- `Conversation` model with many-to-many `participants` (users).
+- `Message` model with UUID primary key, `sender` (FK to `User`), `conversation` (FK to `Conversation`), `message_body` and timestamp.
+
+API endpoints are exposed under the `/api/` path (see `messaging_app/urls.py`).
+
+## Requirements
+
+- Python 3.8+
+- Django 4.2+
+- Django REST Framework
+
+It's recommended to create an isolated virtual environment rather than committing `env/` to the repo.
+
+## Docker / Docker Compose (local development)
+
+This project includes a `Dockerfile` and a `docker-compose.yml` (in the `messaging_app/` folder). The Compose setup runs two services:
+
+- `web`: the Django application
+- `db`: a MySQL 8.0 database
+
+Recommended steps (from the `messaging_app/` directory):
+
+```bash
+# create a .env file (copy messaging_app/.env)
+docker compose up --build
+
+# or run detached
+docker compose up -d --build
+
+# view logs (helpful for waiting for migrations to complete)
+docker compose logs -f web
+```
+
+Notes:
+- The `web` service binds to port `8000` on the host by default. Open `http://localhost:8000`.
+- Database credentials and other sensitive settings must live in `.env` (not checked in). The project `messaging_app/.env` is provided for convenience but should be removed from git history before making the repository public.
+- The `db` service uses a named Docker volume (`mysql_data`) to persist data across container restarts.
+
+## Quick local (non-Docker) setup
+
+From the project root:
+
+```bash
+# create virtualenv
+python3 -m venv .venv
+source .venv/bin/activate
+
+# install dependencies
+pip install -r requirements.txt
+
+# apply migrations and create a superuser
+python manage.py migrate
+python manage.py createsuperuser
+
+# run the dev server
+python manage.py runserver
+```
+
+## API routes (summary)
+
+- List/create conversations: GET/POST /api/conversations/
+- Retrieve/update/delete a conversation: GET/PUT/PATCH/DELETE /api/conversations/{id}/
+- Add participants to a conversation (custom action): POST /api/conversations/{id}/add_participants/ with JSON body: `{"user_ids": ["<uuid>", ...]}`
+- List/create messages: GET/POST /api/messages/
+- Retrieve/update/delete a message: GET/PUT/PATCH/DELETE /api/messages/{id}/
+
+Notes:
+- To post a message, send POST /api/messages/ with JSON: `{"conversation": "<conversation-uuid>", "message_body": "Hello"}`. The implementation uses `request.user` as the sender, so requests should be authenticated.
+
+## Git / repository hygiene
+
+Do NOT commit the following (they are included in `.gitignore`):
+
+- `env/`, `venv/` (virtual environments)
+- `db.sqlite3` (local DB)
+- `__pycache__/`, `*.py[cod]` (bytecode)
+- `.env` (local secrets)
+
+If `env/`, `.env`, or `db.sqlite3` were already committed, remove them from history before pushing publicly. I can prepare commands to purge them from git history if you want.
 
 ## Postman collection
 
 There is a Postman collection file `post_man-Collections.json` included at the project root to help testing the API endpoints.
 
-How to use
-- Import `post_man-Collections.json` into Postman (File → Import → choose the file).
-- Set the collection variables or an environment with:
-	- `base_url` (default `http://127.0.0.1:8000`)
-	- `username` / `password` (your user credentials)
-	- `access_token` / `refresh_token` (will be filled after obtaining tokens)
+## Next steps / improvements
 
-Steps
-1. Create a superuser if you haven't already:
-
-```bash
-source env/bin/activate
-python manage.py createsuperuser
-```
-
-2. Obtain JWT tokens using the "Auth - Obtain Token" request in Postman (POST `/api/token/`).
-	 Copy `access` into `access_token` and `refresh` into `refresh_token`.
-
-3. Use the collection requests (Conversations / Messages) — they include an `Authorization: Bearer {{access_token}}` header.
-
-Quick curl examples
-- Obtain token:
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/token/ \
-	-H "Content-Type: application/json" \
-	-d '{"username":"admin","password":"yourpassword"}'
-```
-
-- Create a conversation (authenticated):
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/conversations/ \
-	-H "Content-Type: application/json" \
-	-H "Authorization: Bearer <ACCESS_TOKEN>" \
-	-d '{}'
-```
-
-Notes
-- The Postman collection is a convenience for manual testing. I can add Postman test scripts to automatically extract tokens into variables if you want.
-
-
-## License & contact
-
-This repository template has no license specified. Add a `LICENSE` file if you want to open-source this project.
-
-If you want, I can also:
-- add a `requirements.txt` from the current virtualenv,
-- remove committed `env/` and `db.sqlite3` from git history,
-- add basic API auth and permissions,
-- or create a small test suite and run it.
+- Add API authentication (Token or JWT) and apply `IsAuthenticated` permissions where appropriate.
+- Add tests for viewsets and serializers.
+- Harden settings for production (move `SECRET_KEY` to environment variables, set `DEBUG=False`, configure allowed hosts, static/media storage).
 
 ---
 
