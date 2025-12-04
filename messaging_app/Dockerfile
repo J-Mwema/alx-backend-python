@@ -23,5 +23,7 @@ COPY . /app/
 # Expose Django default port
 EXPOSE 8000
 
+# When running the image locally you can publish the port with `-p 8000:8000`
+
 # Default command for development — matches CI expectation
 CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
