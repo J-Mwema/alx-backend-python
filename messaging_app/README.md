@@ -119,28 +119,47 @@ It's recommended to create an isolated virtual environment rather than committin
 
 ## Docker / Docker Compose (local development)
 
-This project includes a `Dockerfile` and a `docker-compose.yml` (in the `messaging_app/` folder). The Compose setup runs two services:
+This project includes a `Dockerfile` and a `docker-compose.yml` in this folder. The Compose setup runs a `web` Django service and a `db` service (MySQL by default).
 
-- `web`: the Django application
-- `db`: a MySQL 8.0 database
+Run these commands from the `messaging_app/` directory.
 
-Recommended steps (from the `messaging_app/` directory):
+- **Build the image (optional):**
 
 ```bash
-# create a .env file (copy messaging_app/.env)
-docker compose up --build
-
-# or run detached
-docker compose up -d --build
-
-# view logs (helpful for waiting for migrations to complete)
-docker compose logs -f web
+# build an image locally (useful for debugging or CI)
+docker build -t alx-backend-python/messaging_app .
 ```
 
-Notes:
-- The `web` service binds to port `8000` on the host by default. Open `http://localhost:8000`.
-- Database credentials and other sensitive settings must live in `.env` (not checked in). The project `messaging_app/.env` is provided for convenience but should be removed from git history before making the repository public.
-- The `db` service uses a named Docker volume (`mysql_data`) to persist data across container restarts.
+- **Start services with Docker Compose:**
+
+```bash
+# build and start (foreground)
+docker compose up --build
+
+# or run in background
+docker compose up -d --build
+```
+
+- **Run Django management commands (migrations, createsuperuser, shell):**
+
+```bash
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py shell
+```
+
+- **View logs / stop services:**
+
+```bash
+docker compose logs -f web
+docker compose down
+```
+
+- **Notes:**
+	- The `web` service binds to port `8000` by default. Open `http://localhost:8000` after the containers are running.
+	- Put sensitive values (DB credentials, `SECRET_KEY`) into a `.env` file and do not commit it. The `docker-compose.yml` reads environment variables from `.env` if present.
+	- The `db` service uses a named Docker volume (e.g. `mysql_data`) to persist data across restarts.
 
 ## Quick local (non-Docker) setup
 
