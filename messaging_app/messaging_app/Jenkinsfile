@@ -1,0 +1,100 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.8-slim'
+            args '-v /tmp:/tmp'
+        }
+    }
+    
+    environment {
+        DATABASE_URL = 'sqlite:///db.sqlite3'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '📦 Checking out source code...'
+                checkout scm
+                sh 'pwd'
+                sh 'ls -la'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                echo '🔧 Installing dependencies...'
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        
+        stage('Run Database Migrations') {
+            steps {
+                echo '🗄️ Running database migrations...'
+                sh 'python manage.py migrate --noinput'
+            }
+        }
+        
+        stage('Run Tests with Django') {
+            steps {
+                echo '🧪 Running tests with Django test runner...'
+                sh '''
+                    echo "Running Django tests..."
+                    python manage.py test chats.tests --verbosity=2
+                '''
+            }
+        }
+        
+        stage('Run Tests with Pytest') {
+            steps {
+                echo '🧪 Running tests with Pytest...'
+                sh '''
+                    echo "Running Pytest..."
+                    python -m pytest chats/tests.py -v --tb=short --junitxml=test-results.xml
+                '''
+            }
+            post {
+                always {
+                    junit 'test-results.xml'
+                    archiveArtifacts artifacts: 'test-results.xml', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Generate Test Report') {
+            steps {
+                echo '📊 Generating test report...'
+                sh '''
+                    echo "=== Test Execution Report ===" > test-report.txt
+                    echo "Date: $(date)" >> test-report.txt
+                    echo "=============================" >> test-report.txt
+                    echo "" >> test-report.txt
+                    echo "Django Test Results:" >> test-report.txt
+                    echo "---------------------" >> test-report.txt
+                    python manage.py test chats.tests --verbosity=2 2>&1 | tail -20 >> test-report.txt
+                    echo "" >> test-report.txt
+                    echo "Pytest Results:" >> test-report.txt
+                    echo "----------------" >> test-report.txt
+                    python -m pytest chats/tests.py -v 2>&1 | tail -20 >> test-report.txt
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test-report.txt', fingerprint: true
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo '✅ Pipeline completed.'
+        }
+        success {
+            echo '🎉 Pipeline succeeded!'
+        }
+        failure {
+            echo '❌ Pipeline failed!'
+        }
+    }
+}
