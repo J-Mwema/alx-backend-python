@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code from GitHub...'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        credentialsId: 'github-creds',
+                        url: 'https://github.com/J-Mwema/alx-backend-python.git'
+                    ]]
+                ])
+                sh 'pwd'
+                sh 'ls -la'
+            }
+        }
+        
+        stage('Setup Environment') {
+            steps {
+                echo 'Setting up Python environment...'
+                sh '''
+                    python3 --version
+                    pip3 --version
+                '''
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing Python dependencies...'
+                sh 'pip3 install -r requirements.txt'
+            }
+        }
+        
+        stage('Run Tests with Pytest') {
+            steps {
+                echo 'Running tests using pytest...'
+                sh '''
+                    # Install pytest
+                    pip3 install pytest pytest-django
+                    # Run tests
+                    python3 -m pytest chats/tests.py -v --tb=short --junitxml=test-results.xml
+                '''
+            }
+            post {
+                always {
+                    junit 'test-results.xml'
+                }
+            }
+        }
+        
+        stage('Generate Test Report') {
+            steps {
+                echo 'Generating test report...'
+                sh '''
+                    echo "=== Test Execution Report ===" > test-report.txt
+                    echo "Date: $(date)" >> test-report.txt
+                    echo "=============================" >> test-report.txt
+                    echo "" >> test-report.txt
+                    echo "Test Results:" >> test-report.txt
+                    python3 -m pytest chats/tests.py -v 2>&1 | tail -50 >> test-report.txt
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test-report.txt', fingerprint: true
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completed.'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
