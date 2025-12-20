@@ -2,14 +2,13 @@ pipeline {
     agent {
         docker {
             image 'python:3.8-slim'
-            args '-v /tmp:/tmp'
         }
     }
     
     stages {
         stage('Checkout') {
             steps {
-                echo '📦 Checking out source code from GitHub...'
+                echo 'Checking out source code from GitHub...'
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/master']],
@@ -24,49 +23,43 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                echo '📦 Installing Python dependencies...'
-                sh 'pip install -r requirements.txt'
-            }
-        }
-        
-        stage('Run Database Migrations') {
-            steps {
-                echo '🗄️ Running database migrations...'
-                sh 'python manage.py migrate --noinput'
+                echo 'Installing Python dependencies...'
+                sh 'pip3 install -r messaging_app/requirements.txt'
             }
         }
         
         stage('Run Tests with Pytest') {
             steps {
-                echo '🧪 Running tests using pytest...'
+                echo 'Running tests using pytest...'
                 sh '''
-                    pip install pytest pytest-django pytest-cov
-                    python -m pytest chats/tests.py -v --tb=short --junitxml=test-results.xml
+                    cd messaging_app
+                    pip3 install pytest pytest-django
+                    python3 manage.py migrate --noinput
+                    python3 -m pytest chats/tests.py -v --junitxml=test-results.xml
                 '''
             }
             post {
                 always {
-                    junit 'test-results.xml'
-                    archiveArtifacts artifacts: 'test-results.xml', fingerprint: true
+                    junit 'messaging_app/test-results.xml'
                 }
             }
         }
         
         stage('Generate Test Report') {
             steps {
-                echo '📊 Generating test report...'
+                echo 'Generating test report...'
                 sh '''
-                    echo "=== Test Execution Report ===" > test-report.txt
+                    cd messaging_app
+                    echo "Test Execution Report" > test-report.txt
+                    echo "=====================" >> test-report.txt
                     echo "Date: $(date)" >> test-report.txt
-                    echo "=============================" >> test-report.txt
                     echo "" >> test-report.txt
-                    echo "Test Results:" >> test-report.txt
-                    python -m pytest chats/tests.py -v 2>&1 | tail -50 >> test-report.txt
+                    python3 -m pytest chats/tests.py -v 2>&1 | tail -30 >> test-report.txt
                 '''
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'test-report.txt', fingerprint: true
+                    archiveArtifacts artifacts: 'messaging_app/test-report.txt', fingerprint: true
                 }
             }
         }
@@ -74,13 +67,13 @@ pipeline {
     
     post {
         always {
-            echo '✅ Pipeline completed.'
+            echo 'Pipeline completed.'
         }
         success {
-            echo '🎉 Pipeline succeeded!'
+            echo 'Pipeline succeeded!'
         }
         failure {
-            echo '❌ Pipeline failed!'
+            echo 'Pipeline failed!'
         }
     }
 }
