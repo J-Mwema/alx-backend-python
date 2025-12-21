@@ -18,6 +18,68 @@ API endpoints are exposed under the `/api/` path (see `messaging_app/urls.py`).
 
 It's recommended to create an isolated virtual environment rather than committing `env/` to the repo.
 
+---
+
+## CI/CD Pipeline
+
+This project includes comprehensive CI/CD configurations for both Jenkins and GitHub Actions.
+
+### Jenkins Pipeline
+
+The `messaging_app/Jenkinsfile` defines a complete Jenkins pipeline that:
+
+1. **Checkout** - Pulls source code from GitHub using stored credentials
+2. **Install Dependencies** - Installs Python dependencies from `requirements.txt`
+3. **Run Tests** - Executes tests using pytest and generates JUnit reports
+4. **Generate Report** - Creates test execution reports as build artifacts
+5. **Build Docker Image** - Builds the Docker image for the messaging app
+6. **Push Docker Image** - Pushes the image to Docker Hub
+
+#### Jenkins Setup
+
+1. Run Jenkins in Docker:
+```bash
+docker run -d --name jenkins -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+```
+
+2. Access Jenkins at `http://localhost:8080` and install required plugins:
+   - Git Plugin
+   - Pipeline Plugin
+   - ShiningPanda Plugin
+
+3. Add credentials in Jenkins:
+   - `github-creds` - GitHub credentials for repository access
+   - `docker-hub-creds` - Docker Hub credentials for image push
+
+4. Create a new Pipeline job and point it to the `messaging_app/Jenkinsfile`
+
+### GitHub Actions
+
+#### CI Workflow (`messaging_app/.github/workflows/ci.yml`)
+
+Runs on every push and pull request:
+- Sets up MySQL database service for testing
+- Installs dependencies and runs Django migrations
+- Runs **Flake8 linting** - fails build on critical errors
+- Executes **pytest** with code coverage
+- Uploads test results and coverage reports as artifacts
+
+#### Deployment Workflow (`messaging_app/.github/workflows/dep.yml`)
+
+Builds and pushes Docker images:
+- Uses Docker Buildx for efficient builds
+- Pushes to Docker Hub using GitHub Secrets
+- Supports automatic tagging (branch, SHA, latest)
+
+#### Required GitHub Secrets
+
+Add these in your repository settings (Settings → Secrets → Actions):
+- `DOCKER_USERNAME` - Your Docker Hub username
+- `DOCKER_PASSWORD` - Your Docker Hub password or access token
+
+---
+
 ## Quick setup
 
 From the project root:
