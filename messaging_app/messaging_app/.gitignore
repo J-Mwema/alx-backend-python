@@ -1,28 +1,121 @@
+# ========================
 # Python
+# ========================
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# C extensions
+*.c
+*.cpp
+
+# Distribution / packaging
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+pip-wheel-metadata/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# ========================
+# Virtual Environments
+# ========================
+.env
+.venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+.virtualenv/
+virtualenv/
 
+# ========================
 # Django
+# ========================
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*.sqlite3
+*.sqlite3-journal
+media/
+staticfiles/
+static/
 
-# IDE
+# ========================
+# Environment / Secrets
+# ========================
+.env
+.env.*
+.envrc
+*.pem
+*.key
+secrets.json
+
+# ========================
+# IDEs and Editors
+# ========================
 .vscode/
 .idea/
+*.sublime-workspace
+*.sublime-project
 *.swp
 *.swo
+*~
+.project
+.pydevproject
+.settings/
+.spyderproject
+.spyproject
+.ropeproject
 
-# OS
+# ========================
+# OS Generated Files
+# ========================
 .DS_Store
 .DS_Store?
 ._*
@@ -30,7 +123,54 @@ db.sqlite3-journal
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Jenkins
+# ========================
+# Jupyter Notebook
+# ========================
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+profile_default/
+ipython_config.py
+
+# ========================
+# Type Checkers
+# ========================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# ========================
+# Celery
+# ========================
+celerybeat-schedule
+celerybeat.pid
+
+# ========================
+# Test / CI Artifacts
+# ========================
 test-results.xml
 test-report.txt
+coverage.xml
+junit.xml
+.coverage
+htmlcov/
+
+# ========================
+# Docker
+# ========================
+*.log
+docker-compose.override.yml
+
+# ========================
+# Misc
+# ========================
+*.bak
+*.tmp
+*.temp
+.cache/
+*.pid
+*.seed
+*.pid.lock
