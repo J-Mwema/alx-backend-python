@@ -1,279 +1,52 @@
-# Messaging App (Django REST)
+# Django messaging app
 
-Lightweight messaging API built with Django and Django REST Framework. This app provides simple conversations and messages between users using a custom UUID-based `User` model.
+[Back to the repository overview](../README.md)
 
-## Overview
+This project is a Django REST Framework API for user conversations and
+messages. It includes a custom user model, conversation and message
+endpoints, JWT-related helpers, participant permissions, filtering,
+pagination, automated tests, and Docker/Kubernetes/CI configuration.
 
-- Custom `User` model based on `AbstractUser` with UUID primary key, role, phone number and timestamps.
-- `Conversation` model with many-to-many `participants` (users).
-- `Message` model with UUID primary key, `sender` (FK to `User`), `conversation` (FK to `Conversation`), `message_body` and timestamp.
+## Project layout
 
-API endpoints are exposed under the `/api/` path (see `messaging_app/urls.py`).
+- [`chats/`](./chats/) — user, conversation, and message models; serializers;
+  API views; permissions; filters; and tests.
+- [`messaging_app/`](./messaging_app/README.md) — Django configuration and
+  additional deployment/CI assets.
+- [`manage.py`](./manage.py) — Django management entry point.
+- [`requirements.txt`](./requirements.txt) — Python dependencies.
+- [`pytest.ini`](./pytest.ini) — pytest and Django test configuration.
+- [`docker-compose.yml`](./docker-compose.yml) and
+  [`Dockerfile`](./Dockerfile) — container setup.
+- [`Jenkinsfile`](./Jenkinsfile) and the
+  [deployment manifests](./) — CI/CD and Kubernetes-related configuration.
+- [`post_man-Collections`](./post_man-Collections) — Postman API requests.
 
-## Requirements
+## Run locally
 
-- Python 3.8+
-- Django 4.2+
-- Django REST Framework
-
-It's recommended to create an isolated virtual environment rather than committing `env/` to the repo.
-
----
-
-## CI/CD Pipeline
-
-This project includes comprehensive CI/CD configurations for both Jenkins and GitHub Actions.
-
-### Jenkins Pipeline
-
-The `messaging_app/Jenkinsfile` defines a complete Jenkins pipeline that:
-
-1. **Checkout** - Pulls source code from GitHub using stored credentials
-2. **Install Dependencies** - Installs Python dependencies from `requirements.txt`
-3. **Run Tests** - Executes tests using pytest and generates JUnit reports
-4. **Generate Report** - Creates test execution reports as build artifacts
-5. **Build Docker Image** - Builds the Docker image for the messaging app
-6. **Push Docker Image** - Pushes the image to Docker Hub
-
-#### Jenkins Setup
-
-1. Run Jenkins in Docker:
-```bash
-docker run -d --name jenkins -p 8080:8080 -p 50000:50000 \
-  -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
-```
-
-2. Access Jenkins at `http://localhost:8080` and install required plugins:
-   - Git Plugin
-   - Pipeline Plugin
-   - ShiningPanda Plugin
-
-3. Add credentials in Jenkins:
-   - `github-creds` - GitHub credentials for repository access
-   - `docker-hub-creds` - Docker Hub credentials for image push
-
-4. Create a new Pipeline job and point it to the `messaging_app/Jenkinsfile`
-
-### GitHub Actions
-
-#### CI Workflow (`messaging_app/.github/workflows/ci.yml`)
-
-Runs on every push and pull request:
-- Sets up MySQL database service for testing
-- Installs dependencies and runs Django migrations
-- Runs **Flake8 linting** - fails build on critical errors
-- Executes **pytest** with code coverage
-- Uploads test results and coverage reports as artifacts
-
-#### Deployment Workflow (`messaging_app/.github/workflows/dep.yml`)
-
-Builds and pushes Docker images:
-- Uses Docker Buildx for efficient builds
-- Pushes to Docker Hub using GitHub Secrets
-- Supports automatic tagging (branch, SHA, latest)
-
-#### Required GitHub Secrets
-
-Add these in your repository settings (Settings → Secrets → Actions):
-- `DOCKER_USERNAME` - Your Docker Hub username
-- `DOCKER_PASSWORD` - Your Docker Hub password or access token
-
----
-
-## Quick setup
-
-From the project root:
+From the repository root:
 
 ```bash
-# create virtualenv (if you don't have one)
 python3 -m venv .venv
 source .venv/bin/activate
-
-# install minimal deps
-pip install django djangorestframework
-
-# (optional) create a requirements.txt for reproducibility
-pip freeze > requirements.txt
-
-# make and apply migrations
-python manage.py makemigrations
-python manage.py migrate
-
-# create a superuser to access the admin
-python manage.py createsuperuser
-
-# run the dev server
-python manage.py runserver
+python3 -m pip install -r messaging_app/requirements.txt
+cd messaging_app
+python3 manage.py migrate
+python3 manage.py runserver
 ```
 
-## API routes (summary)
-
-- List/create conversations: GET/POST /api/conversations/
-- Retrieve/update/delete a conversation: GET/PUT/PATCH/DELETE /api/conversations/{id}/
-- Add participants to a conversation (custom action): POST /api/conversations/{id}/add_participants/ with JSON body: `{"user_ids": ["<uuid>", ...]}`
-- List/create messages: GET/POST /api/messages/
-- Retrieve/update/delete a message: GET/PUT/PATCH/DELETE /api/messages/{id}/
-
-Notes:
-- To post a message, send POST /api/messages/ with JSON: `{"conversation": "<conversation-uuid>", "message_body": "Hello"}`. The current implementation uses `request.user` as the sender, so the request should be authenticated.
-- Authentication and permission configuration is up to you (session, token, JWT). If you expect anonymous posting, adjust `MessageViewSet.create()` or permissions accordingly.
-
-## Development notes
-
-- `AUTH_USER_MODEL = 'chats.User'` is set in `messaging_app/settings.py`.
-- The project currently uses SQLite (`db.sqlite3`) for development.
-- `rest_framework` and `chats` are registered under `INSTALLED_APPS`.
-
-## Git / repository hygiene
-
-Do NOT commit the following (they are included in `.gitignore`):
-
-- `env/`, `venv/` (virtual environments)
-- `db.sqlite3` (local DB)
-- `__pycache__/`, `*.py[cod]` (bytecode)
-- `.env` (local secrets)
-
-If `env/` or `db.sqlite3` were already committed, remove them from history before pushing publically (I can provide the commands if needed).
-
-## Testing the API quickly (example)
-
-You can use `curl` or a tool like HTTPie/Postman. Example (using session auth or a token as configured):
+Run the test suite from the `messaging_app` directory:
 
 ```bash
-# create an empty conversation
-curl -X POST http://127.0.0.1:8000/api/conversations/ -u username:password
-
-# add participants to a conversation
-curl -X POST http://127.0.0.1:8000/api/conversations/<conv-uuid>/add_participants/ \
-	-H "Content-Type: application/json" \
-	-d '{"user_ids":["<user-uuid1>","<user-uuid2>"]}' -u username:password
-
-# send a message (authenticated)
-curl -X POST http://127.0.0.1:8000/api/messages/ \
-	-H "Content-Type: application/json" \
-	-d '{"conversation":"<conv-uuid>","message_body":"Hello world"}' -u username:password
+pytest
 ```
 
-"""Messaging App README
+The Compose setup is also available from this directory with
+`docker compose up --build`. Consult the Compose file and Django settings for
+the environment required by the selected database configuration. Do not
+commit local secrets, virtual environments, or database files.
 
-Overview and quickstart for both local and Docker-based development.
-"""
+## Related project
 
-# Messaging App (Django REST)
-
-Lightweight messaging API built with Django and Django REST Framework. This app provides conversations and messages between users using a custom UUID-based `User` model.
-
-## Overview
-
-- Custom `User` model based on `AbstractUser` with UUID primary key, role, phone number and timestamps.
-- `Conversation` model with many-to-many `participants` (users).
-- `Message` model with UUID primary key, `sender` (FK to `User`), `conversation` (FK to `Conversation`), `message_body` and timestamp.
-
-API endpoints are exposed under the `/api/` path (see `messaging_app/urls.py`).
-
-## Requirements
-
-- Python 3.8+
-- Django 4.2+
-- Django REST Framework
-
-It's recommended to create an isolated virtual environment rather than committing `env/` to the repo.
-
-## Docker / Docker Compose (local development)
-
-This project includes a `Dockerfile` and a `docker-compose.yml` in this folder. The Compose setup runs a `web` Django service and a `db` service (MySQL by default).
-
-Run these commands from the `messaging_app/` directory.
-
-- **Build the image (optional):**
-
-```bash
-# build an image locally (useful for debugging or CI)
-docker build -t alx-backend-python/messaging_app .
-```
-
-- **Start services with Docker Compose:**
-
-```bash
-# build and start (foreground)
-docker compose up --build
-
-# or run in background
-docker compose up -d --build
-```
-
-- **Run Django management commands (migrations, createsuperuser, shell):**
-
-```bash
-docker compose exec web python manage.py migrate
-docker compose exec web python manage.py makemigrations
-docker compose exec web python manage.py createsuperuser
-docker compose exec web python manage.py shell
-```
-
-- **View logs / stop services:**
-
-```bash
-docker compose logs -f web
-docker compose down
-```
-
-- **Notes:**
-	- The `web` service binds to port `8000` by default. Open `http://localhost:8000` after the containers are running.
-	- Put sensitive values (DB credentials, `SECRET_KEY`) into a `.env` file and do not commit it. The `docker-compose.yml` reads environment variables from `.env` if present.
-	- The `db` service uses a named Docker volume (e.g. `mysql_data`) to persist data across restarts.
-
-## Quick local (non-Docker) setup
-
-From the project root:
-
-```bash
-# create virtualenv
-python3 -m venv .venv
-source .venv/bin/activate
-
-# install dependencies
-pip install -r requirements.txt
-
-# apply migrations and create a superuser
-python manage.py migrate
-python manage.py createsuperuser
-
-# run the dev server
-python manage.py runserver
-```
-
-## API routes (summary)
-
-- List/create conversations: GET/POST /api/conversations/
-- Retrieve/update/delete a conversation: GET/PUT/PATCH/DELETE /api/conversations/{id}/
-- Add participants to a conversation (custom action): POST /api/conversations/{id}/add_participants/ with JSON body: `{"user_ids": ["<uuid>", ...]}`
-- List/create messages: GET/POST /api/messages/
-- Retrieve/update/delete a message: GET/PUT/PATCH/DELETE /api/messages/{id}/
-
-Notes:
-- To post a message, send POST /api/messages/ with JSON: `{"conversation": "<conversation-uuid>", "message_body": "Hello"}`. The implementation uses `request.user` as the sender, so requests should be authenticated.
-
-## Git / repository hygiene
-
-Do NOT commit the following (they are included in `.gitignore`):
-
-- `env/`, `venv/` (virtual environments)
-- `db.sqlite3` (local DB)
-- `__pycache__/`, `*.py[cod]` (bytecode)
-- `.env` (local secrets)
-
-If `env/`, `.env`, or `db.sqlite3` were already committed, remove them from history before pushing publicly. I can prepare commands to purge them from git history if you want.
-
-## Postman collection
-
-There is a Postman collection file `post_man-Collections.json` included at the project root to help testing the API endpoints.
-
-## Next steps / improvements
-
-- Add API authentication (Token or JWT) and apply `IsAuthenticated` permissions where appropriate.
-- Add tests for viewsets and serializers.
-- Harden settings for production (move `SECRET_KEY` to environment variables, set `DEBUG=False`, configure allowed hosts, static/media storage).
-
----
-
+- [Django middleware and chat API](../Django-Middleware-0x03/README.md)
+- [All repository tasks](../README.md#project-map)

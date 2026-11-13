@@ -1,37 +1,42 @@
-# Context managers & async operations (0x02)
+# Context managers and asynchronous operations
 
-This folder contains exercises demonstrating class-based context managers for
-database connections and asynchronous database queries using `aiosqlite`.
+[Back to the repository overview](../README.md)
 
-Files
-- `0-databaseconnection.py` — `DatabaseConnection` class-based context manager that opens/closes a sqlite3 connection.
-- `1-execute.py` — `ExecuteQuery` context manager that executes a provided query and returns results.
-- `3-concurrent.py` — Asynchronous concurrent queries using `aiosqlite` and `asyncio.gather`.
+This task explores reusable database context managers and asynchronous
+database access. The examples open and close SQLite connections reliably,
+execute a query inside a context, and run independent queries concurrently
+with `asyncio`.
 
-Requirements
-- Python 3.8+
-- `aiosqlite` (only required for `3-concurrent.py`):
+## Exercises
+
+- [`0-databaseconnection.py`](./0-databaseconnection.py) — a class-based
+  context manager for a SQLite connection.
+- [`1-execute.py`](./1-execute.py) — a context manager that executes a query
+  and exposes its results.
+- [`3-concurrent.py`](./3-concurrent.py) — concurrent asynchronous queries
+  using `aiosqlite`.
+
+## Requirements and running
+
+Use Python 3.8 or newer. The concurrent example additionally requires
+`aiosqlite`:
 
 ```bash
-python3 -m pip install --user aiosqlite
+python3 -m pip install aiosqlite
 ```
 
-How to run
-
-1. Ensure the sample database `users.db` exists in the repository root. You can create it with the provided setup script:
+The examples use the sample `users.db` database. Create it from the repository
+root if needed, then run an exercise:
 
 ```bash
 python3 python-decorators-0x01/setup_database.py
-```
-
-2. Run the scripts:
-
-```bash
 python3 python-context-async-perations-0x02/0-databaseconnection.py
-python3 python-context-async-perations-0x02/1-execute.py
-# For async concurrent queries (requires aiosqlite):
-python3 python-context-async-perations-0x02/3-concurrent.py
 ```
 
-Notes
-- `3-concurrent.py` requires `aiosqlite`; if it's not installed you'll get ModuleNotFoundError. Install with pip as shown above.
+Run `1-execute.py` or `3-concurrent.py` by substituting its path above.
+
+## Other tasks
+
+- [Generators](../python-generators-0x00/README.md)
+- [Decorators](../python-decorators-0x01/README.md)
+- [All repository tasks](../README.md#project-map)

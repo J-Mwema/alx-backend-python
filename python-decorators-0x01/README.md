@@ -1,88 +1,38 @@
-# Python decorators exercises (0x01)
+# Python decorators and database operations
 
-This directory contains a set of small exercises that demonstrate using Python decorators to manage common database-related concerns when working with sqlite3:
+[Back to the repository overview](../README.md)
 
-- `0-log_queries.py` — Implement a decorator to log SQL queries before execution.
-- `1-with_db_connection.py` — Implement a decorator that opens and closes a sqlite3 connection and passes it to the wrapped function.
-- `2-transactional.py` — Implement a decorator that wraps a DB operation in a transaction (commit on success, rollback on exception).
-- `3-retry_on_failure.py` — Implement a decorator factory that retries a database operation a configurable number of times with delay.
-- `4-cache_query.py` — Implement a decorator that caches query results (by query string) to avoid redundant database calls.
-- `setup_database.py` — Helper script that creates a `users` table and inserts sample users (only inserts if table is empty).
+This task demonstrates Python decorators for common SQLite database concerns:
+logging queries, managing connections, controlling transactions, retrying
+failures, and caching query results.
 
-How to run
+## Exercises
 
-1. Ensure you have Python 3 installed.
-2. From the repository root, create the sample database:
+- [`0-log_queries.py`](./0-log_queries.py) — log SQL queries before execution.
+- [`1-with_db_connection.py`](./1-with_db_connection.py) — open and close a
+  database connection around a function call.
+- [`2-transactional.py`](./2-transactional.py) — commit successful operations
+  and roll back failed ones.
+- [`3-retry_on_failure.py`](./3-retry_on_failure.py) — retry a database
+  operation after failures.
+- [`4-cache_query.py`](./4-cache_query.py) — cache query results.
+- [`setup_database.py`](./setup_database.py) — create the sample users
+  database.
 
-```bash
-python3 python-decorators-0x01/setup_database.py
-```
+## Run
 
-3. Run any exercise file. Example:
-
-```bash
-python3 python-decorators-0x01/0-log_queries.py
-python3 python-decorators-0x01/1-with_db_connection.py
-python3 python-decorators-0x01/2-transactional.py
-python3 python-decorators-0x01/3-retry_on_failure.py
-python3 python-decorators-0x01/4-cache_query.py
-```
-
-What to expect
-
-- The decorators are small, self-contained, and intended for learning. Each script prints output demonstrating the decorator behavior (for example logging SQL queries, successful commits, or cache hits/misses).
-
-Notes and suggestions
-
-- The `setup_database.py` script is idempotent: it will not insert duplicates if the `users` table already contains rows.
-- Consider adding tests (pytest) to verify decorator behavior automatically.
-- For production code, prefer connection context managers and stronger error handling.
-
-License
-
-This repository is provided for learning and practice purposes.
-(The file `/home/gikonyo/ALX_PRODEV_BACKEND/alx-backend-python/python-decorators-0x01/README.md` exists, but is empty)
-# Python decorators exercises (0x01)
-
-This directory contains a set of small exercises that demonstrate using Python decorators to manage common database-related concerns when working with sqlite3:
-
-- `0-log_queries.py` — Implement a decorator to log SQL queries before execution.
-- `1-with_db_connection.py` — Implement a decorator that opens and closes a sqlite3 connection and passes it to the wrapped function.
-- `2-transactional.py` — Implement a decorator that wraps a DB operation in a transaction (commit on success, rollback on exception).
-- `3-retry_on_failure.py` — Implement a decorator factory that retries a database operation a configurable number of times with delay.
-- `4-cache_query.py` — Implement a decorator that caches query results (by query string) to avoid redundant database calls.
-- `setup_database.py` — Helper script that creates a `users` table and inserts sample users (only inserts if table is empty).
-
-How to run
-
-1. Ensure you have Python 3 installed.
-2. From the repository root, create the sample database:
+From the repository root, create the sample database and run an exercise:
 
 ```bash
 python3 python-decorators-0x01/setup_database.py
-```
-
-3. Run any exercise file. Example:
-
-```bash
 python3 python-decorators-0x01/0-log_queries.py
-python3 python-decorators-0x01/1-with_db_connection.py
-python3 python-decorators-0x01/2-transactional.py
-python3 python-decorators-0x01/3-retry_on_failure.py
-python3 python-decorators-0x01/4-cache_query.py
 ```
 
-What to expect
+Each exercise is a standalone learning example; use the corresponding script
+path to run another one.
 
-- The decorators are small, self-contained, and intended for learning. Each script prints output demonstrating the decorator behavior (for example logging SQL queries, successful commits, or cache hits/misses).
+## Other tasks
 
-Notes and suggestions
-
-- The `setup_database.py` script is idempotent: it will not insert duplicates if the `users` table already contains rows.
-- Consider adding tests (pytest) to verify decorator behavior automatically.
-- For production code, prefer connection context managers and stronger error handling.
-
-License
-
-This repository is provided for learning and practice purposes.
-
+- [Generators](../python-generators-0x00/README.md)
+- [Context managers and async operations](../python-context-async-perations-0x02/README.md)
+- [All repository tasks](../README.md#project-map)
